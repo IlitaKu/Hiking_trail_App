@@ -1,3 +1,4 @@
-require_relative '../config/environment'
+require_relative '../config/environment.rb'
 
-run
+cli = CLI.new
+cli.run
