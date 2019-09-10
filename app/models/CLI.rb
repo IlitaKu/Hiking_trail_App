@@ -3,6 +3,11 @@ require 'tty-prompt'
 require 'pry'
 
 class CLI
+    
+    # def initialize()
+    #     @list = nil
+    # end
+
     @@user = ""
     def run
         puts "Welcome to the Hiking Trail review app!"
@@ -14,7 +19,7 @@ class CLI
             login
         else
             puts "Bye bye!"
-            sleep(4)
+            # sleep(4)
         end
     end
 
@@ -28,7 +33,7 @@ class CLI
     def login
         prompt = TTY::Prompt.new
         user_input = prompt.ask("Enter your username")
-        user = User.all.find{|user| user.name == user_input}
+        user = User.all.find{|user| user.name.upcase == user_input.upcase}
         # binding.pry
         if user 
             puts "Welcome back #{user.name}"
@@ -58,9 +63,24 @@ class CLI
     end
 
     def hiking_trail_locations
+        prompt = TTY::Prompt.new
+        @list = Hiking_Trail.all.map {|location| p location.location}
+        # binding.pry
+        if prompt.yes?("Would you like to write a review?")
+            write_review
+        else
+            commands 
+        end
     end
 
     def write_review
+        prompt = TTY::Prompt.new
+        choices = prompt.select("Please select location to review:", @list)
+        # binding.pry
+        # @prompt.select("Select a place to review?", @choices)
+        # Review.create(content, rating)
+
+        # binding.pry
     end
 
     def see_reviews
