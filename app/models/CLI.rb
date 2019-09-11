@@ -3,16 +3,11 @@ require 'tty-prompt'
 require 'pry'
 
 class CLI
-    
-    # def initialize()
-    #     @list = nil
-    # end
-
+    @@prompt = TTY::Prompt.new
     @@user = ""
     def run
         puts "Welcome to the Hiking Trail review app!"
-        prompt = TTY::Prompt.new
-        option = prompt.select('Please select the following option', ["New user", "Login", "Exit"])
+        option = @@prompt.select('Please select the following option', ["New user", "Login", "Exit"])
         if option == "New user"
             new_user
         elsif option == "Login"
@@ -24,15 +19,13 @@ class CLI
     end
 
     def new_user
-        prompt = TTY::Prompt.new
-        user_instance = prompt.ask("Enter your name")
+        user_instance = @@prompt.ask("Enter your name")
         @@user = User.create(name: user_instance)
         commands
         # Transfer the follow up options
     end
     def login
-        prompt = TTY::Prompt.new
-        user_input = prompt.ask("Enter your username")
+        user_input = @@prompt.ask("Enter your username")
         user = User.all.find{|user| user.name.upcase == user_input.upcase}
         # binding.pry
         if user 
@@ -42,15 +35,14 @@ class CLI
             # transfer follow up options
             commands
         else 
-            puts "That user does not exists"
+            @@prompt.say("This user does not exist")
             run
         end
 
         # binding.pry
     end
     def commands
-        prompt = TTY::Prompt.new
-        command = prompt.select("Please select the following:", ["See hiking trail locations", "Write a review", "See your reviews","Exit"])
+        command = @@prompt.select("Please select the following:", ["See hiking trail locations", "Write a review", "See your reviews", "Update your reviews", "Exit"])
         if command == "See hiking trail locations"
             hiking_trail_locations
         elsif 
@@ -59,18 +51,20 @@ class CLI
         elsif 
             command == "See your reviews"
             see_reviews
+        elsif
+            command == "Update your reviews"
+            update_review
         else
             run
         end
     end
 
     def hiking_trail_locations
-        prompt = TTY::Prompt.new
         @list = Hiking_Trail.all.map{|location| 
             # binding.pry
         p location.location}
         # binding.pry
-        if prompt.yes?("Would you like to write a review?")
+        if @@prompt.yes?("Would you like to write a review?")
             write_review
         else
             commands 
@@ -78,11 +72,10 @@ class CLI
     end
 
     def write_review
-        prompt = TTY::Prompt.new
-        selected_place = prompt.select("Please select location to review:", @list)
+        selected_place = @@prompt.select("Please select location to review:", @list)
         trail = Hiking_Trail.find_by(location: selected_place)
-        content = prompt.ask("Tell us what you think about #{selected_place} trail", required: true)
-        rating = prompt.ask("please rate your experience on a scale of 1 to 5", required: true)
+        content = @@prompt.ask("Tell us what you think about #{selected_place} trail", required: true)
+        rating = @@prompt.ask("please rate your experience on a scale of 1 to 5", required: true)
         # Review.create(trail_id: trail.id, user_id: @@user.id, rating: rating, content: content)
         Review.create([{content: content, rating: rating, hiking_trail_id: trail.id, user_id: @@user.id}])
         # binding.pry
@@ -90,10 +83,30 @@ class CLI
     end
 
     def see_reviews
-        prompt = TTY::Prompt.new
-        @personal_review = Review.select{|review|review.user_id == @@user.id}.map{|review| review.content}
-        user_reviews = prompt.select("Please see or update your reviews:", @personal_review)
 
+        @personal_reviews = Review.select{|review|review.user_id == @@user.id}
+        
+        @review_names = @personal_reviews.map{|review| review.content}
+        @user_review = @@prompt.select("Here is all the reviews we got from you so far!", @review_names)
+        commands
+    end
+
+    def update_review
+        @personal_reviews = Review.select{|review|review.user_id == @@user.id}
+        
+        @review_names = @personal_reviews.map{|review| review.content}
+        @content = @@prompt.select("Here is all the reviews we got from you so far!", @review_names)
+        @selected_review = Review.find_by(content: @content)
+        user_choice = @@prompt.select("What would you like to update?", ["content", "rating"])
+        # updated_review = @@user.reviews.select{|content| content.content == @user_review}
+        if user_choice == "content"
+
+            new_content = @@prompt.ask("What is the new content?",required:true)
+            @selected_review.update(content: new_content)
+        end
+    end
+    def delete_review
+        
     end
 end
 # binding.pry
