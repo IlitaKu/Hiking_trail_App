@@ -7,6 +7,16 @@ Review.destroy_all
 route1 = Hiking_Trail.create(location: "Everest")
 route2 = Hiking_Trail.create(location: "Amazon")
 route3 = Hiking_Trail.create(location: "Sahara")
+route4 = Hiking_Trail.create(location: "Tongariro Alpine Crossing, New Zealand")
+route5 = Hiking_Trail.create(location: "Puez-Odle Altopiano, Dolomites, Italy")
+route6 = Hiking_Trail.create(location: "Jiankou to Mutianyu, Great Wall of China.")
+route7 = Hiking_Trail.create(location: "The Zion Narrows, Zion National Park.")
+route8 = Hiking_Trail.create(location: "Half Dome, Yosemite National Park.")
+route8 = Hiking_Trail.create(location: "Trolltunga, Norway.")
+route8 = Hiking_Trail.create(location: "Inca Trail, Machu Picchu, Peru")
+
+
+
 user1 = User.create(name: "Mike")
 user2 = User.create(name: "John")
 user3 = User.create(name: "Sarah")

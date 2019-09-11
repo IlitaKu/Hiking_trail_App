@@ -42,7 +42,7 @@ class CLI
         # binding.pry
     end
     def commands
-        command = @@prompt.select("Please select the following:", ["See hiking trail locations", "Write a review", "See your reviews", "Update your reviews", "Exit"])
+        command = @@prompt.select("Please select the following:", ["See hiking trail locations", "Write a review", "See your reviews", "Update your reviews", "Delete your account", "Exit"])
         if command == "See hiking trail locations"
             hiking_trail_locations
         elsif 
@@ -54,6 +54,9 @@ class CLI
         elsif
             command == "Update your reviews"
             update_review
+        elsif
+            command == "Delete your account"
+            delete_account
         else
             run
         end
@@ -105,8 +108,12 @@ class CLI
             @selected_review.update(content: new_content)
         end
     end
-    def delete_review
-        
+    def delete_account
+        delete_account = @@prompt.ask("If you want to delete your account type 'DESTROY'")
+        if delete_account == 'DESTROY'
+            # binding.pry
+        @@user.delete
+        end
     end
 end
 # binding.pry
