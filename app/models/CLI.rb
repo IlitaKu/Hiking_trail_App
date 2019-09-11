@@ -45,6 +45,8 @@ class CLI
             puts "That user does not exists"
             run
         end
+
+        # binding.pry
     end
     def commands
         prompt = TTY::Prompt.new
@@ -64,7 +66,9 @@ class CLI
 
     def hiking_trail_locations
         prompt = TTY::Prompt.new
-        @list = Hiking_Trail.all.map {|location| p location.location}
+        @list = Hiking_Trail.all.map{|location| 
+            # binding.pry
+        p location.location}
         # binding.pry
         if prompt.yes?("Would you like to write a review?")
             write_review
@@ -75,15 +79,21 @@ class CLI
 
     def write_review
         prompt = TTY::Prompt.new
-        choices = prompt.select("Please select location to review:", @list)
+        selected_place = prompt.select("Please select location to review:", @list)
+        trail = Hiking_Trail.find_by(location: selected_place)
+        content = prompt.ask("Tell us what you think about #{selected_place} trail", required: true)
+        rating = prompt.ask("please rate your experience on a scale of 1 to 5", required: true)
+        # Review.create(trail_id: trail.id, user_id: @@user.id, rating: rating, content: content)
+        Review.create([{content: content, rating: rating, hiking_trail_id: trail.id, user_id: @@user.id}])
         # binding.pry
-        # @prompt.select("Select a place to review?", @choices)
-        # Review.create(content, rating)
-
-        # binding.pry
+        commands 
     end
 
     def see_reviews
+        prompt = TTY::Prompt.new
+        @personal_review = Review.select{|review|review.user_id == @@user.id}.map{|review| review.content}
+        user_reviews = prompt.select("Please see or update your reviews:", @personal_review)
+
     end
 end
 # binding.pry
