@@ -19,7 +19,7 @@ class CLI
     end
 
     def new_user
-        user_instance = @@prompt.ask("Enter your name")
+        user_instance = @@prompt.ask("Enter your name", default: ENV['USER'])
         @@user = User.create(name: user_instance)
         commands
         # Transfer the follow up options
@@ -70,23 +70,27 @@ class CLI
     end
 
     def write_review
-        #  @list = Hiking_Trail.all.map{|location| p location.location}
         selected_place = @@prompt.select("Please select location to review:", @list)
         trail = Hiking_Trail.find_by(location: selected_place)
         content = @@prompt.ask("Tell us what you think about #{selected_place} trail:", required: true)
         rating = @@prompt.ask("please rate your experience on a scale of 1 to 5:", required: true)
         @@prompt.say("Thank you for participation!")
-        # Review.create(trail_id: trail.id, user_id: @@user.id, rating: rating, content: content)
         Review.create([{content: content, rating: rating, hiking_trail_id: trail.id, user_id: @@user.id}])
         # binding.pry
         commands 
     end
 
     def see_personal_reviews
-       @personal_review = Review.select{|review|review.user_id == @@user.id}.map{|review| review.content}
+        @personal_review = Review.select{|review|review.user_id == @@user.id}.map{|review| review.content}
+        if @personal_review.empty?
+        @@prompt.say("You dont reviews yet.")
+        commands
+        # binding.pry
+        else
         user_reviews = @@prompt.select("Please see or update your reviews:", @personal_review)
         commands
-     end
+        end
+    end
 
     def see_reviews
         all_trails = Hiking_Trail.all.map{|place| place.location}
@@ -103,6 +107,10 @@ class CLI
     end
 
     def update_review
+        if @personal_review.empty?
+            @@prompt.say("You dont reviews yet.")
+            commands
+        end
         @personal_reviews = Review.select{|review|review.user_id == @@user.id}
         @review_names = @personal_reviews.map{|review| review.content}
         @content = @@prompt.select("Here is all the reviews we got from you so far!", @review_names)
@@ -135,3 +143,5 @@ end
     end
 end
 
+# all user
+# all review for each user
