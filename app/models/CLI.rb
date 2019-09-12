@@ -31,8 +31,6 @@ class CLI
         if user 
             puts "Welcome back #{user.name}"
             @@user = user 
-
-            # transfer follow up options
             commands
         else 
             @@prompt.say("This user does not exist")
@@ -50,7 +48,7 @@ class CLI
             see_reviews
         elsif 
             command == "See your reviews"
-            see_reviews
+            see_personal_reviews
         elsif
             command == "Update your reviews"
             update_review
@@ -84,6 +82,12 @@ class CLI
         commands 
     end
 
+    def see_personal_reviews
+       @personal_review = Review.select{|review|review.user_id == @@user.id}.map{|review| review.content}
+        user_reviews = @@prompt.select("Please see or update your reviews:", @personal_review)
+        commands
+     end
+
     def see_reviews
         all_trails = Hiking_Trail.all.map{|place| place.location}
         chosen_trail= @@prompt.select("Select the hiking trail to see reviews", all_trails)
@@ -103,27 +107,30 @@ class CLI
         @review_names = @personal_reviews.map{|review| review.content}
         @content = @@prompt.select("Here is all the reviews we got from you so far!", @review_names)
         @selected_review = Review.find_by(content: @content)
-        user_choice = @@prompt.select("What would you like to update?", ["content", "rating"]
-                
+        user_choice = @@prompt.select("What would you like to update?", ["content", "rating"])
         if user_choice == "content"
             new_content = @@prompt.ask("What is the new content?",required:true)
             @selected_review.update(content: new_content)
+            @@prompt.say("Your review has been updated")
+            commands
         elsif 
             user_choice == "rating"
-            new_rating = @@prompt.ask("What is the new content?",required:true)
+            new_rating = @@prompt.ask("What is the new rating?",required:true)
             @selected_review.update(rating: new_rating)
-        end
         @@prompt.say("Your review has been updated")
         commands
     end
+end
 
     def delete_account
         delete_account = @@prompt.yes?("Are you sure that you want to delete your account?", require: true)
         if delete_account 
         @@user.delete
         @@prompt.say("Your accout has been deleted.")
+        run
         elsif
             @@prompt.say("Phew..that was close! Thank you for staying with us #{@@user.name.capitalize}!")
+            commands
         end
     end
 end
