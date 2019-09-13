@@ -16,6 +16,7 @@ class CLI
             puts "Bye bye!"
             # sleep(4)
         end
+        commands
     end
 
     def new_user
@@ -40,7 +41,7 @@ class CLI
         # binding.pry
     end
     def commands
-        command = @@prompt.select("Please select the following:", ["See hiking trail locations", "Read Hiking Trail reviews", "See your reviews", "Update your reviews", "Delete your account", "Exit"])
+        command = @@prompt.select("Please select the following:", ["See hiking trail locations", "Read Hiking Trail reviews", "See your reviews", "Update your reviews", "Delete your account", "Delete review", "Exit"])
         if command == "See hiking trail locations"
             hiking_trail_locations
         elsif 
@@ -55,6 +56,9 @@ class CLI
         elsif
             command == "Delete your account"
             delete_account
+        elsif 
+            command == "Delete review"
+            delete_review
         else
             run
         end
@@ -74,7 +78,7 @@ class CLI
         trail = Hiking_Trail.find_by(location: selected_place)
         content = @@prompt.ask("Tell us what you think about #{selected_place} trail:", required: true)
         rating = @@prompt.ask("please rate your experience on a scale of 1 to 5:", required: true)
-        @@prompt.say("Thank you for participation!")
+        @@prompt.say("Thank you for your participation!")
         Review.create([{content: content, rating: rating, hiking_trail_id: trail.id, user_id: @@user.id}])
         # binding.pry
         commands 
@@ -83,11 +87,11 @@ class CLI
     def see_personal_reviews
         @personal_review = Review.select{|review|review.user_id == @@user.id}.map{|review| review.content}
         if @personal_review.empty?
-        @@prompt.say("You dont reviews yet.")
+        @@prompt.say("You dont have reviews yet.")
         commands
         # binding.pry
         else
-        user_reviews = @@prompt.select("Please see or update your reviews:", @personal_review)
+        user_reviews = @@prompt.select("Here is all the reviews we got from you so far:", @personal_review)
         commands
         end
     end
@@ -108,7 +112,7 @@ class CLI
 
     def update_review
         if @personal_review.empty?
-            @@prompt.say("You dont reviews yet.")
+            @@prompt.say("You dont have reviews yet.")
             commands
         end
         @personal_reviews = Review.select{|review|review.user_id == @@user.id}
@@ -141,7 +145,20 @@ end
             commands
         end
     end
-end
+     def delete_review
+        content = @@user.reviews.map {|t| t.content}
+        deleted_content = @@prompt.select("Please select the review you would like to delete:", content)
+        delete = @@prompt.yes?("Do you really want to delete this?", require: true)
+        if delete == true
+        review_to_delete = Review.all.find_by(content: deleted_content)
+        review_to_delete.delete
+        @@prompt.say("Your review has been deleted.")
+        elsif
+            @@prompt.say("Your review is safe with us!")
+        end
+        commands
+     end
+    end
 
 # all user
 # all review for each user
